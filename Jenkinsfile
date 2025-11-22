@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "Building..."
+                echo "Building project..."
             }
         }
         stage('Test') {
@@ -15,6 +15,12 @@ pipeline {
             steps {
                 echo "Deploying..."
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline Completed'
         }
     }
 }

@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven' // Name of the Maven installation configured in Jenkins
+        jdk 'JDK 21'  // Optional: specify JDK if needed
+    }
+
     environment {
         VERSION = '1.0.0'
     }
@@ -8,7 +13,9 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo "Building project version ${VERSION}..."
+                // On Windows, use bat instead of sh
+                bat 'mvn -version'
+                bat 'mvn clean install'
             }
         }
 
@@ -17,7 +24,7 @@ pipeline {
                 expression { params.executeTests == true }
             }
             steps {
-                echo "Running tests for version ${VERSION}..."
+                bat 'mvn test'
             }
         }
 

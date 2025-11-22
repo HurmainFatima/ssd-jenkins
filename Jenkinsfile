@@ -1,49 +1,36 @@
 pipeline {
     agent any
 
-    // Define parameters for conditional execution
-    parameters {
-        booleanParam(
-            name: 'executeTests',
-            defaultValue: true,
-            description: 'Check to run the Test stage'
-        )
+    environment {
+        VERSION = '1.0.0'
     }
 
     stages {
         stage('Build') {
             steps {
-                echo 'Building project...'
+                echo "Building project version ${VERSION}..."
             }
         }
 
         stage('Test') {
-            // Conditional execution
             when {
                 expression { params.executeTests == true }
             }
             steps {
-                echo 'Running tests (conditional)...'
+                echo "Running tests for version ${VERSION}..."
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying project...'
+                echo "Deploying version ${VERSION}..."
             }
         }
     }
 
-    // Post-build actions
     post {
         always {
-            echo 'Pipeline Completed'
-        }
-        success {
-            echo 'Build Succeeded'
-        }
-        failure {
-            echo 'Build Failed'
+            echo "Pipeline Completed for version ${VERSION}"
         }
     }
 }

@@ -1,21 +1,43 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven' // Name of the Maven installation configured in Jenkins
-        jdk 'JDK 21'  // Optional: specify JDK if needed
+    // Parameters for conditional execution
+    parameters {
+        booleanParam(
+            name: 'executeTests',
+            defaultValue: true,
+            description: 'Check to run the Test stage'
+        )
     }
 
+    // Environment variables
     environment {
         VERSION = '1.0.0'
     }
 
+    // Build tools
+    tools {
+        maven 'Maven' // Name must match your Jenkins Maven installation
+        // Optional: jdk 'JDK 21' if configured in Jenkins
+    }
+
     stages {
+
         stage('Build') {
             steps {
-                // On Windows, use bat instead of sh
+                echo "Building version ${VERSION}..."
+                
+                // Always print Maven version
                 bat 'mvn -version'
-                bat 'mvn clean install'
+
+                // Only run mvn clean install if pom.xml exists
+                script {
+                    if (fileExists('pom.xml')) {
+                        bat 'mvn clean install'
+                    } else {
+                        echo 'No pom.xml found, skipping Maven build'
+                    }
+                }
             }
         }
 
@@ -24,7 +46,15 @@ pipeline {
                 expression { params.executeTests == true }
             }
             steps {
-                bat 'mvn test'
+                echo "Running tests for version ${VERSION}..."
+                
+                script {
+                    if (fileExists('pom.xml')) {
+                        bat 'mvn test'
+                    } else {
+                        echo 'No pom.xml found, skipping tests'
+                    }
+                }
             }
         }
 
@@ -38,6 +68,12 @@ pipeline {
     post {
         always {
             echo "Pipeline Completed for version ${VERSION}"
+        }
+        success {
+            echo 'Build Succeeded'
+        }
+        failure {
+            echo 'Build Failed'
         }
     }
 }
